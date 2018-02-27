@@ -31,14 +31,15 @@ public class MvpPlugins extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
         // TODO: insert action logic here
-        System.out.println("----------------------------------------------------------------------------------------");
         try {
             psiJavaFile = (PsiJavaFile) e.getData(CommonDataKeys.PSI_FILE);
             project = e.getData(CommonDataKeys.PROJECT);
             virtualFile = (VirtualFile) e.getData(PlatformDataKeys.VIRTUAL_FILE);
-            System.out.println("virtualFile = " + virtualFile.getName().split("\\.")[0]);
-            prefix = virtualFile.getName().split("\\.")[0];
-            System.out.println("prefix = " + prefix);
+            if (virtualFile.getName().contains("Activity")) {
+                prefix = virtualFile.getName().replace("Activity", "");
+            } else {
+                prefix = virtualFile.getName().split("\\.")[0];
+            }
             factory = JavaPsiFacade.getElementFactory(project);
 
             WriteCommandAction.runWriteCommandAction(project, new Runnable() {
@@ -79,7 +80,6 @@ public class MvpPlugins extends AnAction {
         WriteCommandAction.runWriteCommandAction(project, new Runnable() {
             @Override
             public void run() {
-                PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
 //                psiClass = factory.createInterface((prefix + "Contract"));
                 psiClass = directoryService.createInterface(psiDirectory, (prefix + "Contract"));
 
@@ -108,7 +108,6 @@ public class MvpPlugins extends AnAction {
             @Override
             public void run() {
                 psiClass = directoryService.createClass(psiDirectory, prefix + "Presenter", JavaTemplateUtil.INTERNAL_CLASS_TEMPLATE_NAME);
-
                 psiClass.getModifierList().setModifierProperty("public", true);
             }
         });
@@ -120,7 +119,6 @@ public class MvpPlugins extends AnAction {
             @Override
             public void run() {
                 psiClass = directoryService.createClass(psiDirectory, prefix + "Fragment", JavaTemplateUtil.INTERNAL_CLASS_TEMPLATE_NAME);
-
                 psiClass.getModifierList().setModifierProperty("public", true);
             }
         });
