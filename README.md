@@ -40,6 +40,10 @@
     
     2、在xxxFragment.java文件中未实现implements xxxContract.View
     
+    解决思路：
+        1、查找添加泛型的方法
+        2、使用java类文件模板处理以上两个问题
+    
 ### 待优化问题
     1、给接口或类添加注解
     
