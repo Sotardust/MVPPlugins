@@ -1,50 +1,52 @@
 # MVPPlugins
-根据Google官方给出的 MVP模式生成对应文件
+根据Google官方给出的 `MVP + Dragger2` 生成对应文件
 
 ## 插件使用方法
-    1、下载MVPPlugins.jar 在AS中添加插件
+1、下载MVPPlugins.jar 在AS中添加插件
     
-    2、添加成功后，右键点击创建的xxx.Java文件或者在xxx.java类中右键点击类名->generate->MVPPlugins
+2、添加成功后，右键点击创建的xxx.Java文件或者在xxx.java类中右键点击类名->generate->MVPPlugins
 ## 生成四种文件
-    1、xxxContract.java
-    eg:
-        public interface TestsContract {
+1、`xxxContract.java`
+
+       public interface TestContract {
         
-            interface View implements BaseView {
+            interface View extends BaseView < Presenter > {
             
             }
         
-            interface Presenter implements BasePresenter {
+            interface Presenter extends BasePresenter < View > {
             
             }
         }
-    2、xxxFragment.java
-    eg:
-      public class TestsFragment {
+2、`xxxFragment.java`
+   
+      @ActivityScoped
+      public class TestFragment implements TestContract.View {
       
+          @Inject
+          public TestFragment() {
+          
+          }
       }
   
-    3、XXXModule.java
-    eg:
-       public abstract class TestsModule {
+3、`XXXModule.java`
+
+       @Module
+       public abstract class TestModule {
        
        }
+
  
-    4、xxxPresenter.java
-    eg:
-        public class TestsPresenter {
+4、`xxxPresenter.java`
+
+        @ActivityScoped
+        public class TestPresenter implements TestContract.Presenter {
         
+            @Inject
+            public TestPresenter() {
+            
+            }
         }
-### 待解决问题
-    1、在xxxContract.java文件中未实现implements BaseView<Presenter>,BasePresenter<View>
+        
+问题反馈邮箱：dht170916@163.com
     
-    2、在xxxFragment.java文件中未实现implements xxxContract.View
-    
-    解决思路：
-        1、查找添加泛型的方法
-        2、使用java类文件模板处理以上两个问题
-    
-### 待优化问题
-    1、给接口或类添加注解
-    
-    2、创建构造器或生成方法

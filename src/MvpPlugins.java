@@ -55,7 +55,6 @@ public class MvpPlugins extends AnAction {
                     generatePresenter();
                     generateContact();
 
-
                     FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
                     OpenFileDescriptor fileDescriptor = new OpenFileDescriptor(project, psiDirectory.getVirtualFile());
                     fileEditorManager.openTextEditor(fileDescriptor, true);//Open the Contract
@@ -64,7 +63,6 @@ public class MvpPlugins extends AnAction {
 
 
         } catch (Exception e1) {
-            System.out.println("e1.toString() = " + e1.toString());
             e1.printStackTrace();
         }
     }
@@ -80,20 +78,30 @@ public class MvpPlugins extends AnAction {
         WriteCommandAction.runWriteCommandAction(project, new Runnable() {
             @Override
             public void run() {
-//                psiClass = factory.createInterface((prefix + "Contract"));
+                //创建类
                 psiClass = directoryService.createInterface(psiDirectory, (prefix + "Contract"));
 
+                //创建接口
                 PsiClass view = factory.createInterface("View");
                 PsiClass presenter = factory.createInterface("Presenter");
 
-                PsiClass baseView = factory.createInterface("BaseView");
-                PsiClass basePresenter = factory.createInterface("BasePresenter");
+                //使用表达式显示接口的泛型
+                PsiExpression baseView = factory.createExpressionFromText("BaseView<Presenter>", view);
+                PsiExpression basePresenter = factory.createExpressionFromText("BasePresenter<View>", presenter);
 
+                //添加extends关键字
+                PsiKeyword psiKeyword = factory.createKeyword("extends", view);
+
+                //设置public属性是否显示
                 view.getModifierList().setModifierProperty("public", false);
                 presenter.getModifierList().setModifierProperty("public", false);
 
-                view.getImplementsList().add(factory.createClassReferenceElement(baseView));
-                presenter.getImplementsList().add(factory.createClassReferenceElement(basePresenter));
+                view.getExtendsList().add(psiKeyword);
+                view.getExtendsList().add(baseView);
+                presenter.getExtendsList().add(psiKeyword);
+                presenter.getExtendsList().add(basePresenter);
+
+//                baseView.getModifierList().add(factory.createMethod("isActive", PsiType.BOOLEAN));
 
                 psiClass.add(view);
                 psiClass.add(presenter);
@@ -107,8 +115,12 @@ public class MvpPlugins extends AnAction {
         WriteCommandAction.runWriteCommandAction(project, new Runnable() {
             @Override
             public void run() {
-                psiClass = directoryService.createClass(psiDirectory, prefix + "Presenter", JavaTemplateUtil.INTERNAL_CLASS_TEMPLATE_NAME);
+                psiClass = directoryService.createClass(psiDirectory, (prefix + "Presenter implements " + prefix + "Contract.Presenter "), JavaTemplateUtil.INTERNAL_CLASS_TEMPLATE_NAME);
                 psiClass.getModifierList().setModifierProperty("public", true);
+                psiClass.getModifierList().addAnnotation("ActivityScoped");
+                PsiMethod psiMethod = factory.createConstructor();
+                psiMethod.getModifierList().addAnnotation("Inject");
+                psiClass.add(psiMethod);
             }
         });
 
@@ -118,8 +130,12 @@ public class MvpPlugins extends AnAction {
         WriteCommandAction.runWriteCommandAction(project, new Runnable() {
             @Override
             public void run() {
-                psiClass = directoryService.createClass(psiDirectory, prefix + "Fragment", JavaTemplateUtil.INTERNAL_CLASS_TEMPLATE_NAME);
+                psiClass = directoryService.createClass(psiDirectory, (prefix + "Fragment implements " + prefix + "Contract.View "), JavaTemplateUtil.INTERNAL_CLASS_TEMPLATE_NAME);
                 psiClass.getModifierList().setModifierProperty("public", true);
+                psiClass.getModifierList().addAnnotation("ActivityScoped");
+                PsiMethod psiMethod = factory.createConstructor();
+                psiMethod.getModifierList().addAnnotation("Inject");
+                psiClass.add(psiMethod);
             }
         });
     }
@@ -131,6 +147,7 @@ public class MvpPlugins extends AnAction {
                 psiClass = directoryService.createClass(psiDirectory, prefix + "Module", JavaTemplateUtil.INTERNAL_CLASS_TEMPLATE_NAME);
                 psiClass.getModifierList().setModifierProperty("public", true);
                 psiClass.getModifierList().setModifierProperty("abstract", true);
+                psiClass.getModifierList().addAnnotation("Module");
             }
         });
 
